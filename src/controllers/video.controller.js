@@ -6,7 +6,7 @@ import {
   uploadOnCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   //TODO: get all videos based on query, sort, pagination
@@ -128,8 +128,8 @@ const getVideoById = asyncHandler(async (req, res) => {
   //TODO: get video by id
   const { videoId } = req.params;
 
-  if (videoId === "videoId" || videoId === ":videoId") {
-    throw new ApiError(400, "Please provide a videoId.");
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid videoId.");
   }
 
   const video = await Video.findById(videoId)
@@ -150,8 +150,8 @@ const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const { title, description } = req.body;
 
-  if (videoId === "videoId" || videoId === ":videoId") {
-    throw new ApiError(400, "Please provide a videoId.");
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid videoId.");
   }
 
   const thumbnailPath = req.file?.path;
@@ -198,8 +198,8 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
   //TODO: delete video
   const { videoId } = req.params;
-  if (videoId === "videoId" || videoId === ":videoId") {
-    throw new ApiError(400, "Please provide a videoId.");
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid videoId.");
   }
 
   const mongoId = new mongoose.Types.ObjectId(videoId);
@@ -228,8 +228,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  if (videoId === "videoId" || videoId === ":videoId") {
-    throw new ApiError(400, "Please provide a videoId.");
+
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid videoId.");
   }
   const mongoId = new mongoose.Types.ObjectId(videoId);
   try {
