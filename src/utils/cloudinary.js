@@ -10,12 +10,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_APIKEY_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, folderName = "avatars") => {
   try {
     if (!localFilePath) return null;
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
-      folder: "avatars",
+      folder: folderName,
     });
     fs.unlinkSync(localFilePath);
     return response;
@@ -25,13 +25,18 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-const deleteFromCloudinary = async (previousImgUrl) => {
+const deleteFromCloudinary = async (fileUrl, resType = "image") => {
   try {
-    if (!previousImgUrl) return null;
-    const publicId = extractPublicId(previousImgUrl);
-    await cloudinary.uploader.destroy(publicId);
+    if (!fileUrl) return null;
+    const publicId = extractPublicId(fileUrl);
+    return await cloudinary.uploader.destroy(publicId, {
+      resource_type: resType,
+    });
   } catch (error) {
-    throw new ApiError(400, error.message || "Image not deleted successfully");
+    throw new ApiError(
+      400,
+      error.message || "Image or Video not deleted successfully"
+    );
   }
 };
 

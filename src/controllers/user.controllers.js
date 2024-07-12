@@ -54,11 +54,14 @@ const register = asyncHandler(async (req, res) => {
   }
 
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
+  const coverImageLocalPath = req.files?.coverImage[0]?.path;
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
   if (!avatar) {
     throw new ApiError(400, "Avatar not uploaded successfully");
+  }
+  if (!coverImage) {
+    throw new ApiError(400, "Cover Image not uploaded successfully");
   }
 
   const user = await User.create({
@@ -324,7 +327,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Username is required");
   }
 
-  const channel = await User.aggregate([
+  const pipeline = [
     {
       $match: {
         username: username?.toLowerCase(),
@@ -374,7 +377,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         isSubscribed: 1,
       },
     },
-  ]);
+  ];
+
+  const channel = await User.aggregate(pipeline);
 
   if (!channel?.length) {
     throw new ApiError(404, "Channel not found");
